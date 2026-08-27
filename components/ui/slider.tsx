@@ -27,11 +27,12 @@ function Slider({
       ? defaultValue
       : [min, max];
 
+  const percent = max > min ? ((values[0] - min) / (max - min)) * 100 : 0;
   const steps = step > 0 ? Math.round((max - min) / step) : 0;
   const ticks = steps > 1 && steps <= MAX_TICKS ? steps : 0;
 
   const label = valueLabel ? (
-    <span className="absolute inset-y-0 left-3.5 flex items-center text-sm font-medium tabular-nums whitespace-nowrap">
+    <span className="absolute inset-y-0 left-5 flex items-center text-sm font-medium tabular-nums whitespace-nowrap">
       {valueLabel}
     </span>
   ) : null;
@@ -51,7 +52,7 @@ function Slider({
       <SliderPrimitive.Control className="relative flex h-9 w-full touch-none items-center select-none data-disabled:opacity-50">
         <SliderPrimitive.Track
           data-slot="slider-track"
-          className="relative h-full w-full rounded-xl bg-primary/10 select-none"
+          className="relative h-full w-full overflow-hidden rounded-xl bg-primary/10 select-none"
         >
           {Array.from({ length: ticks - 1 }, (_, index) => (
             <span
@@ -70,7 +71,10 @@ function Slider({
 
           <SliderPrimitive.Indicator
             data-slot="slider-range"
-            className="relative h-full overflow-hidden rounded-xl bg-primary text-primary-foreground select-none"
+            className={cn(
+              "relative h-full overflow-hidden rounded-xl bg-primary text-primary-foreground select-none",
+              percent < 1.5 && "opacity-0",
+            )}
           >
             <span aria-hidden>{label}</span>
           </SliderPrimitive.Indicator>
@@ -80,7 +84,7 @@ function Slider({
           <SliderPrimitive.Thumb
             data-slot="slider-thumb"
             key={index}
-            className="h-4 w-1.25 shrink-0 rounded-full bg-background ring-1 shadow-sm ring-primary/20 transition-shadow select-none focus-visible:ring-4 focus-visible:ring-ring/50 focus-visible:outline-hidden"
+            className="h-4 w-1.25 shrink-0 rounded-full bg-background ring-1 shadow-sm ring-primary/30 transition-shadow select-none focus-visible:ring-4 focus-visible:ring-ring/50 focus-visible:outline-hidden"
           />
         ))}
       </SliderPrimitive.Control>
