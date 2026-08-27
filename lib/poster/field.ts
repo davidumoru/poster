@@ -9,12 +9,6 @@ import {
 } from "@/lib/poster/rng";
 import type { FieldVariant, PosterSpec } from "@/lib/poster/types";
 
-/**
- * The procedural field behind every cover. One pass over a square buffer,
- * quantised hard onto the palette ramp so the result prints like flat spot
- * colour rather than a gradient.
- */
-
 const VARIANT_INDEX: Record<FieldVariant, number> = {
   contour: 0,
   topo: 1,
@@ -31,9 +25,7 @@ const VARIANT_INDEX: Record<FieldVariant, number> = {
 type Buffer = {
   canvas: HTMLCanvasElement;
   image: ImageData;
-  /** Raw field values, held between the sampling and the quantisation pass. */
   values: Float32Array;
-  /** Signature of the last pass, so unrelated edits skip the pixel loop. */
   key: string;
 };
 
@@ -74,14 +66,11 @@ function fieldKey(spec: PosterSpec, time: number) {
 }
 
 const HISTOGRAM_BINS = 512;
-/** How far the tone curve is pulled towards perfectly equal band areas. */
 const BALANCE = 0.85;
 
-/**
- * Every field function is bell-shaped around its midpoint, which would hand
- * one band most of the sheet. Flattening the histogram gives each colour a
- * comparable share, which is what makes flat-colour printing read as designed.
- */
+// Every field function is bell-shaped around its midpoint, which would hand one
+// band most of the sheet. Flattening the histogram gives each colour a
+// comparable share; BALANCE is how far towards fully equal areas to go.
 function equalise(values: Float32Array, bands: number) {
   const histogram = new Uint32Array(HISTOGRAM_BINS);
   for (let i = 0; i < values.length; i++) {
@@ -126,8 +115,7 @@ export function renderField(spec: PosterSpec, options: FieldOptions = {}) {
   const { data } = image;
   const size = resolution;
 
-  // Contiguous horizontal slices, so `signal` tears in strips rather than
-  // per-scanline confetti.
+  // Contiguous slices, so `signal` tears in strips not per-scanline confetti.
   const sliceHeight = Math.max(1, Math.round(size / (14 + spec.scan * 44)));
 
   for (let y = 0; y < size; y++) {
@@ -143,8 +131,6 @@ export function renderField(spec: PosterSpec, options: FieldOptions = {}) {
       const px = (x + rowShift + size) % size;
       const nx = px / size - 0.5;
       const ny = y / size - 0.5;
-      // Three octaves at a low frequency: the warp should bend the field in
-      // broad strokes, not stir fine detail into every coordinate.
       const warpX = fbm(nx * 1.5 + phase, ny * 1.5, spec.seed + 1, 3) - 0.5;
       const warpY = fbm(nx * 1.5, ny * 1.5 - phase, spec.seed + 2, 3) - 0.5;
       const wx = nx * spec.density + warpX * spec.warp * 3;
@@ -153,13 +139,13 @@ export function renderField(spec: PosterSpec, options: FieldOptions = {}) {
       let value: number;
 
       switch (variant) {
-        // contour — soft masses broken by concentric interference
+        // contour
         case 0: {
           const rings = Math.abs(Math.sin((wx * wx + wy * wy) * 1.2 + phase));
           value = fbm(wx * 0.85 + rings * 0.35, wy * 0.85, spec.seed + 7, 4);
           break;
         }
-        // topo — ridged noise read as survey contours
+        // topo
         case 1: {
           const ridge = fbm(
             wx * 0.5 + phase * 0.4,
@@ -173,7 +159,7 @@ export function renderField(spec: PosterSpec, options: FieldOptions = {}) {
           value = Math.pow(1 - rings, 0.55);
           break;
         }
-        // lava — heavy, slow-moving flow
+        // lava
         case 2: {
           value =
             fbm(wx * 0.75 + phase * 1.7, wy * 1.2, spec.seed + 13, 4) * 0.65 +
@@ -181,7 +167,7 @@ export function renderField(spec: PosterSpec, options: FieldOptions = {}) {
             Math.sin(wx * 2.2) * 0.14;
           break;
         }
-        // ribbons — diagonal bands with a lazy wobble
+        // ribbons
         case 3: {
           value =
             0.5 +
@@ -193,7 +179,7 @@ export function renderField(spec: PosterSpec, options: FieldOptions = {}) {
               );
           break;
         }
-        // signal — the field torn along its slices and dropped out
+        // signal
         case 4: {
           const jitter = (sliceNoise - 0.5) * spec.scan * 1.4;
           value = fbm(
@@ -205,7 +191,7 @@ export function renderField(spec: PosterSpec, options: FieldOptions = {}) {
           if (sliceNoise < spec.scan * 0.22) value = 1 - value;
           break;
         }
-        // cells — packed plates
+        // cells
         case 5: {
           const cells =
             cellField(
@@ -216,7 +202,7 @@ export function renderField(spec: PosterSpec, options: FieldOptions = {}) {
           value = cells + fbm(wx * 0.28, wy * 0.28, spec.seed) * 0.28;
           break;
         }
-        // moire — two rulings beating against each other
+        // moire
         case 6: {
           const angleA = wx * 1.35 + Math.sin(wy * 0.45 + phase) * spec.warp;
           const angleB = wy * 1.18 - Math.cos(wx * 0.42 - phase) * spec.warp;
@@ -226,7 +212,7 @@ export function renderField(spec: PosterSpec, options: FieldOptions = {}) {
             0.25 * Math.sin(angleB * Math.PI);
           break;
         }
-        // weave — warp and weft crossing
+        // weave
         case 7: {
           const warpLine = Math.sin((wx + warpY * 0.7) * Math.PI * 1.1 + phase);
           const weftLine = Math.sin((wy + warpX * 0.7) * Math.PI * 1.1 - phase);
@@ -237,7 +223,7 @@ export function renderField(spec: PosterSpec, options: FieldOptions = {}) {
             fbm(wx * 0.45, wy * 0.45, spec.seed + 67, 3) * 0.3;
           break;
         }
-        // burst — radial spokes from the centre
+        // burst
         case 8: {
           const radius = Math.sqrt(nx * nx + ny * ny) * spec.density;
           const angle = Math.atan2(ny + warpY * 0.12, nx + warpX * 0.12);
@@ -249,7 +235,7 @@ export function renderField(spec: PosterSpec, options: FieldOptions = {}) {
             fbm(wx * 0.35, wy * 0.35, spec.seed + 79, 4) * 0.22;
           break;
         }
-        // blocks — the field resampled onto a coarse grid
+        // blocks
         default: {
           const block = Math.max(4, Math.floor(30 - spec.scan * 20));
           const bx = Math.floor(px / block);
@@ -287,10 +273,6 @@ export function renderField(spec: PosterSpec, options: FieldOptions = {}) {
   return canvas;
 }
 
-/**
- * Mean brightness of a normalised region of a rendered field, for choosing
- * ink that stays legible over whatever the field happens to put there.
- */
 export function sampleLuminance(
   canvas: HTMLCanvasElement,
   left: number,
@@ -308,7 +290,6 @@ export function sampleLuminance(
   const { data } = ctx.getImageData(x, y, width, height);
 
   let total = 0;
-  // Every eighth pixel is plenty for an average.
   for (let i = 0; i < data.length; i += 32) {
     total += data[i] * 0.2126 + data[i + 1] * 0.7152 + data[i + 2] * 0.0722;
   }
