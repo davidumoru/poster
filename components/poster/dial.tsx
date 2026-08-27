@@ -12,7 +12,6 @@ type DialProps = {
   onChange: (value: number) => void;
 };
 
-/** A labelled slider with its current value set in tabular figures. */
 export function Dial({ label, value, min, max, step, onChange }: DialProps) {
   const decimals = step < 1 ? (step < 0.1 ? 2 : 1) : 0;
 

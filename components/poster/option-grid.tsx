@@ -13,7 +13,6 @@ type OptionGridProps<T extends string> = {
   columns?: 1 | 2 | 3;
 };
 
-/** Single-select option set laid out as a grid of toggles. */
 export function OptionGrid<T extends string>({
   label,
   value,
@@ -28,8 +27,8 @@ export function OptionGrid<T extends string>({
       size="sm"
       value={[value]}
       onValueChange={(next) => {
-        // Base UI clears the array when the active item is pressed again;
-        // a layout always has to be chosen, so keep the current one.
+        // Base UI clears the array when the active item is pressed again, but
+        // something always has to be selected here.
         const [picked] = next;
         if (picked) onChange(picked as T);
       }}
