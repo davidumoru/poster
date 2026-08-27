@@ -1,17 +1,12 @@
 import { hexToRgb, luminance } from "@/lib/poster/color";
 import { createRng } from "@/lib/poster/rng";
 
-/**
- * The modular colour grid: columns of unequal weight, each subdivided into
- * rows. Proportions come from a small set of hand-tuned rhythms rather than
- * flat randomness — one dominant field, one supporting field, and a few narrow
- * strips is what makes the composition read as designed instead of generated.
- */
-
 export type Rect = { x: number; y: number; width: number; height: number };
 
 export type Block = Rect & { color: string; column: number; row: number };
 
+// Hand-tuned rather than random: one dominant field, one supporting field and a
+// few narrow strips is what makes a composition read as designed.
 const COLUMN_RHYTHMS = [
   [0.4, 0.33, 0.11, 0.09, 0.07],
   [0.46, 0.35, 0.19],
@@ -43,7 +38,7 @@ function jitter(weights: number[], rng: () => number, amount: number) {
   );
 }
 
-/** Breathing: nudges the shared edges without ever opening a gap. */
+// Renormalised, so nudging a shared edge never opens a gap between blocks.
 function animate(
   weights: number[],
   phase: number,
@@ -63,10 +58,8 @@ export type GridOptions = {
   rect: Rect;
   colors: string[];
   seed: number;
-  /** Displacement amplitude for the breathing animation. */
   warp: number;
   phase: number;
-  /** Force a column count instead of picking a rhythm at random. */
   columns?: number;
 };
 
@@ -111,7 +104,6 @@ export function buildGrid({
       const rowHeight = rowWeight * rect.height;
       const left = blocks.length ? blocks[blocks.length - 1].color : null;
 
-      // Walk the shuffled palette, skipping anything that would touch itself.
       let color = palette[ink % palette.length];
       for (let attempt = 0; attempt < palette.length; attempt++) {
         color = palette[(ink + attempt) % palette.length];
@@ -121,8 +113,8 @@ export function buildGrid({
         }
       }
 
+      // Overdrawn by a hair so anti-aliasing never leaves seams between blocks.
       blocks.push({
-        // Overdraw by a hair so anti-aliasing never leaves seams between blocks.
         x: cursorX,
         y: cursorY,
         width: columnWidth + 0.6,
@@ -148,7 +140,6 @@ export function paintGrid(ctx: CanvasRenderingContext2D, blocks: Block[]) {
   }
 }
 
-/** Colour of whatever block sits under a point, for picking legible ink. */
 export function colorAt(blocks: Block[], x: number, y: number) {
   for (const block of blocks) {
     if (
@@ -163,11 +154,8 @@ export function colorAt(blocks: Block[], x: number, y: number) {
   return null;
 }
 
-/**
- * Ink for text that crosses several blocks. Sampling the whole area rather
- * than one point keeps a headline legible where it straddles a light block
- * and a dark one.
- */
+// Samples the whole area, not one point, so a headline straddling a light and a
+// dark block still gets legible ink.
 export function inkForRegion(
   blocks: Block[],
   x: number,
