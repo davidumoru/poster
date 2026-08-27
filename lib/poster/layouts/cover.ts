@@ -27,7 +27,6 @@ function thumbnail(context: RenderContext, x: number, y: number, size: number) {
     return;
   }
 
-  // No upload: show the palette itself as the specimen.
   const ramp = buildRamp(spec.palette.colors, Math.max(4, spec.bands));
   const band = size / ramp.length;
   ramp.forEach((color, index) => {
@@ -36,7 +35,6 @@ function thumbnail(context: RenderContext, x: number, y: number, size: number) {
   });
 }
 
-/** Album-sleeve specimen: square field over an editorial caption strip. */
 function drawSpecimen(context: RenderContext) {
   const { ctx, spec, sheet, time } = context;
   const art = sheet.width;
@@ -87,7 +85,6 @@ function drawSpecimen(context: RenderContext) {
   });
 }
 
-/** Full-bleed field with the caption dropped onto a paper chip. */
 function drawBleed(context: RenderContext) {
   const { ctx, spec, sheet, time } = context;
 
@@ -145,7 +142,7 @@ function drawBleed(context: RenderContext) {
     maxLines: 6,
   });
 
-  // Running head sits straight on the field, so take its ink from the field.
+  // The running head sits straight on the field, so take its ink from there.
   ctx.fillStyle =
     sampleLuminance(field, 0, 0, 0.62, 0.12) > 150
       ? "rgba(20,18,16,0.9)"
@@ -154,7 +151,6 @@ function drawBleed(context: RenderContext) {
   drawTracked(ctx, spec.copy.footer.toUpperCase(), 72, 108, 2.6);
 }
 
-/** Catalogue card: framed field, palette strip, and the settings as data. */
 function drawIndex(context: RenderContext) {
   const { ctx, spec, sheet, time } = context;
 

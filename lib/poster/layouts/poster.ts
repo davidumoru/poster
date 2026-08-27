@@ -16,19 +16,13 @@ import {
 import { drawFill, paperTexture } from "@/lib/poster/texture";
 import type { RenderContext, Sheet } from "@/lib/poster/types";
 
-/**
- * The modular colour-grid family. Every sheet is an ISO A-series proportion
- * with an asymmetric right margin: the grid sits left of centre and the wide
- * right rail carries the vertical colophon.
- */
-
 export const POSTER_SHEET: Sheet = { width: 1000, height: 1414 };
 
 const PAPER = "#f4f2ec";
 const INK = "#141210";
 
 const MARGIN = 76;
-/** Wider right margin — it holds the rotated colophon. */
+// Deliberately wider than MARGIN: the right rail holds the rotated colophon.
 const RAIL = 150;
 const LIVE_WIDTH = POSTER_SHEET.width - MARGIN - RAIL;
 
@@ -49,7 +43,6 @@ function paintField(context: RenderContext, rect: Rect, columns?: number) {
     intensity: spec.grain,
   });
 
-  // A ghost of the uploaded image, the way a press proof shows through.
   if (context.source && spec.scan > 0.04) {
     ctx.save();
     ctx.globalAlpha = Math.min(0.28, spec.scan * 0.3);
@@ -85,7 +78,6 @@ function drawRail(context: RenderContext) {
   });
 }
 
-/** Size at which both headlines fit their half of the measure. */
 function headlineSize(context: RenderContext, width: number) {
   const { ctx, spec } = context;
   const half = width * 0.48;
@@ -95,7 +87,6 @@ function headlineSize(context: RenderContext, width: number) {
   );
 }
 
-/** Headline pair set on a shared baseline, the way a masthead splits. */
 function drawHeadlinePair(
   context: RenderContext,
   x: number,
@@ -114,7 +105,6 @@ function drawHeadlinePair(
 const BODY_SIZE = 15.5;
 const BODY_LEADING = 19.5;
 
-/** Deepest of the two essay columns, in lines. */
 function bodyPairLines(
   context: RenderContext,
   width: number,
@@ -129,7 +119,6 @@ function bodyPairLines(
   );
 }
 
-/** Two justified serif columns — the essay block under the grid. */
 function drawBodyPair(
   context: RenderContext,
   x: number,
@@ -161,10 +150,9 @@ function drawBodyPair(
   });
 }
 
-/** Grid on top, type stacked underneath. The default reading order. */
 function drawStack(context: RenderContext) {
-  // The essay is set first, then the grid takes every line the copy leaves —
-  // so the sheet stays full whether the text runs short or long.
+  // The essay is measured first; the grid then takes every line the copy
+  // leaves, so the sheet fills whether the text runs short or long.
   const colophon = POSTER_SHEET.height - MARGIN;
   const lines = bodyPairLines(context, LIVE_WIDTH, 14);
   const size = headlineSize(context, LIVE_WIDTH);
@@ -188,7 +176,6 @@ function drawStack(context: RenderContext) {
   drawRail(context);
 }
 
-/** Type reversed out over the blocks. Loudest of the five. */
 function drawOverlay(context: RenderContext) {
   const { ctx, spec } = context;
   const rect = { x: MARGIN, y: MARGIN, width: LIVE_WIDTH, height: 1180 };
@@ -260,7 +247,6 @@ function drawOverlay(context: RenderContext) {
   drawColophon(context, POSTER_SHEET.height - MARGIN, MARGIN + LIVE_WIDTH);
 }
 
-/** Grid left, a single narrow type column right. */
 function drawSidebar(context: RenderContext) {
   const { ctx, spec } = context;
   const gridWidth = 520;
@@ -304,7 +290,6 @@ function drawSidebar(context: RenderContext) {
   );
 }
 
-/** Headline band across the top, grid beneath, essay at the foot. */
 function drawBanner(context: RenderContext) {
   const { ctx, spec } = context;
 
@@ -345,7 +330,6 @@ function drawBanner(context: RenderContext) {
   drawRail(context);
 }
 
-/** Two small sheets pinned to a dark ground — a paired specimen. */
 function drawDiptych(context: RenderContext) {
   const { ctx, spec, time } = context;
 
@@ -435,7 +419,7 @@ export function drawPosterSheet(context: RenderContext) {
   }
 
   if (spec.posterVariant !== "diptych") {
-    // Very light tooth across the whole sheet so paper and ink share a surface.
+    // A light tooth over everything, so paper and ink share one surface.
     paperTexture(ctx, 0, 0, POSTER_SHEET.width, POSTER_SHEET.height, {
       seed: spec.seed + 101,
       intensity: spec.grain * 0.28,
