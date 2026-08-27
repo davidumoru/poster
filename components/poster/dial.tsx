@@ -16,12 +16,9 @@ export function Dial({ label, value, min, max, step, onChange }: DialProps) {
   const decimals = step < 1 ? (step < 0.1 ? 2 : 1) : 0;
 
   return (
-    <Field className="gap-2.5">
-      <FieldTitle className="w-full justify-between text-xs font-medium tracking-widest text-muted-foreground uppercase">
+    <Field className="gap-2">
+      <FieldTitle className="text-xs font-medium tracking-widest text-muted-foreground uppercase">
         {label}
-        <span className="font-mono text-foreground tabular-nums">
-          {value.toFixed(decimals)}
-        </span>
       </FieldTitle>
       <Slider
         aria-label={label}
@@ -29,6 +26,7 @@ export function Dial({ label, value, min, max, step, onChange }: DialProps) {
         min={min}
         max={max}
         step={step}
+        valueLabel={value.toFixed(decimals)}
         onValueChange={(next) => {
           const [first] = Array.isArray(next) ? next : [next];
           if (typeof first === "number") onChange(first);
