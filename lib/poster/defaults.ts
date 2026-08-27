@@ -159,7 +159,6 @@ export const DEFAULT_SPEC: PosterSpec = {
   posterVariant: "stack",
   seed: 207195,
   ...FIELD_DEFAULTS.contour,
-  // Opens on a tonal palette; the loud sets suit the grid family better.
   palette: PALETTES[1],
   sourceName: "",
   copy: DEFAULT_COPY,

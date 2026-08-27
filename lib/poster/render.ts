@@ -4,11 +4,10 @@ import type { PosterSpec, Sheet } from "@/lib/poster/types";
 
 export type RenderOptions = {
   source?: HTMLImageElement | null;
-  /** Seconds; drives the breathing animation. */
+  /** Seconds. */
   time?: number;
   /** Device pixels per sheet unit. */
   scale?: number;
-  /** Field buffer resolution; raise it for export. */
   resolution?: number;
 };
 
@@ -46,7 +45,6 @@ export function renderSheet(
   }
 }
 
-/** Renders the sheet at print scale on a detached canvas and hands back a PNG. */
 export function exportSheet(
   spec: PosterSpec,
   { source = null, time = 0, scale = 2, resolution = 768 }: RenderOptions = {},
