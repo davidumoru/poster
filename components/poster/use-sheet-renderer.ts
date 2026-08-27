@@ -9,7 +9,7 @@ import type { PosterSpec } from "@/lib/poster/types";
 export const PREVIEW_SCALE = 1.5;
 export const PREVIEW_RESOLUTION = 384;
 
-/** Fields cost a full pixel pass, so they animate at a lower frame budget. */
+// Fields cost a full pixel pass per frame, so they get a lower frame budget.
 const FRAME_INTERVAL: Record<PosterSpec["family"], number> = {
   cover: 1000 / 18,
   poster: 1000 / 40,
@@ -26,8 +26,8 @@ export function useSheetRenderer({ spec, source, animated }: Options) {
   const timeRef = React.useRef(0);
   const [fontsReady, setFontsReady] = React.useState(false);
 
-  // Metrics measured before the webfont lands are wrong, so wait, then
-  // re-resolve the family names cached for canvas.
+  // Text measured before the webfont lands is wrong, so wait, drop the cached
+  // family names, and redraw.
   React.useEffect(() => {
     let active = true;
 
