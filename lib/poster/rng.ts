@@ -1,13 +1,6 @@
-/**
- * Deterministic noise and randomness. Everything the generator draws is a pure
- * function of `seed`, so the same seed always prints the same sheet.
- */
-
-/**
- * Hash a number into [0, 1). Integer mixing rather than the usual
- * `sin(n) * 43758.5` — the field renderer calls this millions of times per
- * frame, and `Math.sin` is an order of magnitude slower.
- */
+// Integer mixing rather than the usual `sin(n) * 43758.5`: the field renderer
+// calls this millions of times per frame, where `Math.sin` is an order of
+// magnitude slower.
 export function hash(n: number) {
   let x = (n * 65536) | 0;
   x = Math.imul(x ^ (x >>> 15), 0x2c1b3c6d);
@@ -24,11 +17,6 @@ export function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));
 }
 
-export function lerp(a: number, b: number, t: number) {
-  return a + (b - a) * t;
-}
-
-/** Bilinear value noise. Cheap, and smooth enough once fbm stacks it. */
 export function valueNoise(x: number, y: number, seed: number) {
   const xi = Math.floor(x);
   const yi = Math.floor(y);
@@ -43,7 +31,6 @@ export function valueNoise(x: number, y: number, seed: number) {
   return a * (1 - u) * (1 - v) + b * u * (1 - v) + c * (1 - u) * v + d * u * v;
 }
 
-/** Fractal brownian motion over `valueNoise`. Returns roughly [0, 1]. */
 export function fbm(x: number, y: number, seed: number, octaves = 5) {
   let value = 0;
   let amplitude = 0.56;
@@ -61,7 +48,6 @@ export function fbm(x: number, y: number, seed: number, octaves = 5) {
   return value / total;
 }
 
-/** Worley-ish F2 - F1 distance field, for cellular plates. */
 export function cellField(x: number, y: number, seed: number) {
   const xi = Math.floor(x);
   const yi = Math.floor(y);
@@ -89,24 +75,18 @@ export function cellField(x: number, y: number, seed: number) {
   return Math.sqrt(second) - Math.sqrt(nearest);
 }
 
-/** Snap a [0, 1) value onto one of `bands` steps. */
 export function quantize(value: number, bands: number) {
   return clamp(Math.floor(value * bands), 0, bands - 1);
 }
 
 export type Rng = {
-  /** Next float in [0, 1). */
   next: () => number;
   range: (min: number, max: number) => number;
   int: (min: number, maxExclusive: number) => number;
-  chance: (probability: number) => boolean;
   pick: <T>(items: readonly T[]) => T;
   shuffle: <T>(items: readonly T[]) => T[];
-  /** `weights.length` values in [0,1] summing to 1, each at least `min`. */
-  weights: (count: number, min?: number) => number[];
 };
 
-/** mulberry32 — small, fast, and good enough for layout decisions. */
 export function createRng(seed: number): Rng {
   let state = (Math.floor(Math.abs(seed)) || 1) >>> 0;
 
@@ -131,19 +111,11 @@ export function createRng(seed: number): Rng {
     return copy;
   };
 
-  const weights = (count: number, min = 0.08) => {
-    const raw = Array.from({ length: count }, () => min + next());
-    const total = raw.reduce((sum, value) => sum + value, 0);
-    return raw.map((value) => value / total);
-  };
-
   return {
     next,
     range,
     int,
-    chance: (probability) => next() < probability,
     pick: (items) => items[int(0, items.length)],
     shuffle,
-    weights,
   };
 }

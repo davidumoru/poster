@@ -1,9 +1,3 @@
-/**
- * Canvas typography. Canvas cannot resolve `var(--font-sans)` inside
- * `ctx.font`, so the real family names are read off probe elements once and
- * cached — otherwise every sheet silently falls back to the system default.
- */
-
 export type FontRole = "sans" | "serif" | "mono";
 
 const FALLBACKS: Record<FontRole, string> = {
@@ -14,6 +8,9 @@ const FALLBACKS: Record<FontRole, string> = {
 
 let stacks: Record<FontRole, string> | null = null;
 
+// Canvas cannot resolve `var(--font-sans)` inside `ctx.font`, so the concrete
+// family names are read off a probe element. Without this every sheet
+// silently falls back to the system default.
 export function fontStacks(): Record<FontRole, string> {
   if (stacks) return stacks;
   if (typeof document === "undefined") return FALLBACKS;
@@ -37,7 +34,6 @@ export function fontStacks(): Record<FontRole, string> {
   return stacks;
 }
 
-/** Invalidate the cache after webfonts swap in. */
 export function resetFontStacks() {
   stacks = null;
 }
@@ -50,7 +46,6 @@ export function measure(ctx: CanvasRenderingContext2D, text: string) {
   return ctx.measureText(text).width;
 }
 
-/** Greedy line breaking against `maxWidth`, capped at `maxLines`. */
 export function wrapLines(
   ctx: CanvasRenderingContext2D,
   text: string,
@@ -76,7 +71,6 @@ export function wrapLines(
   return lines;
 }
 
-/** Number of lines `text` will occupy in a column of `width`. */
 export function lineCount(
   ctx: CanvasRenderingContext2D,
   text: string,
@@ -95,12 +89,8 @@ export type ParagraphOptions = {
   align?: "left" | "right" | "justify";
 };
 
-/**
- * Draws a text column. `justify` spreads the word gaps to flush both edges —
- * the last line always stays ragged, the way a typesetter would leave it.
- *
- * Returns the y baseline just past the final line.
- */
+// `justify` spreads word gaps to flush both edges, leaving the last line
+// ragged. Returns the baseline just past the final line.
 export function drawParagraph(
   ctx: CanvasRenderingContext2D,
   text: string,
@@ -150,7 +140,6 @@ const supportsLetterSpacing =
   typeof CanvasRenderingContext2D !== "undefined" &&
   "letterSpacing" in CanvasRenderingContext2D.prototype;
 
-/** Micro-caps set with open tracking, as used on colophon and address lines. */
 export function drawTracked(
   ctx: CanvasRenderingContext2D,
   text: string,
@@ -180,7 +169,6 @@ export function trackedWidth(
   return ctx.measureText(text).width + tracking * Math.max(0, text.length - 1);
 }
 
-/** Largest size in [min, max] at which `text` still fits `maxWidth`. */
 export function fitSize(
   ctx: CanvasRenderingContext2D,
   text: string,
@@ -200,7 +188,6 @@ export function fitSize(
   return size;
 }
 
-/** Runs `draw` inside a rotated frame anchored at (x, y). */
 export function rotated(
   ctx: CanvasRenderingContext2D,
   x: number,

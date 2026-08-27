@@ -1,19 +1,11 @@
 import { fbm, hash } from "@/lib/poster/rng";
 
-/**
- * Print texture. The reference sheets read as dyed paper stock rather than
- * flat fills, so every colour area gets three passes: fine fibre grain, a
- * slow uneven dye blotch, and a few creases catching the light.
- */
-
 const TILE = 256;
 let grainTile: HTMLCanvasElement | null = null;
 let blotchTile: HTMLCanvasElement | null = null;
 
-/**
- * Neutral grey noise. Composited with `overlay`, mid-grey is a no-op, so the
- * tile lightens and darkens whatever colour sits underneath without tinting.
- */
+// Neutral grey: under `overlay`, mid-grey is a no-op, so the tile lightens and
+// darkens whatever sits underneath without tinting it.
 function getGrainTile() {
   if (grainTile) return grainTile;
 
@@ -28,7 +20,6 @@ function getGrainTile() {
 
   for (let y = 0; y < TILE; y++) {
     for (let x = 0; x < TILE; x++) {
-      // Stretched horizontally so the grain reads as paper fibre, not TV snow.
       const fibre =
         hash(x * 0.71 + y * 311.7) * 0.62 + hash(x * 0.13 + y * 57.1) * 0.38;
       const value = 128 + (fibre - 0.5) * 132;
@@ -45,7 +36,6 @@ function getGrainTile() {
   return canvas;
 }
 
-/** Low-frequency unevenness, the way dye soaks into stock. */
 function getBlotchTile() {
   if (blotchTile) return blotchTile;
 
@@ -77,9 +67,7 @@ function getBlotchTile() {
 
 export type PaperOptions = {
   seed: number;
-  /** 0 flat, 1 heavily fibrous. */
   intensity: number;
-  /** Skip the crease pass on small areas like thumbnails. */
   creases?: boolean;
 };
 
@@ -120,7 +108,6 @@ export function paperTexture(
     ctx.fillRect(x, y, width, height);
   }
 
-  // Loose fibres sitting on the surface.
   const fibres = Math.floor(width * height * 0.00012 * (0.4 + intensity));
   ctx.globalAlpha = 0.16 + intensity * 0.2;
   ctx.lineWidth = 0.8;
@@ -168,7 +155,6 @@ function intrinsic(source: Bitmap) {
     : { width: source.width, height: source.height };
 }
 
-/** Draws `source` cropped to fill the rect, centred — CSS `object-fit: cover`. */
 export function drawFill(
   ctx: CanvasRenderingContext2D,
   source: Bitmap,

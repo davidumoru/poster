@@ -1,10 +1,5 @@
 import type { Palette } from "@/lib/poster/types";
 
-/**
- * Colours are ordered light to dark. The field renderer maps quantisation
- * bands onto this order, so the sequence reads as a tonal ramp; the grid
- * renderer shuffles it per seed and treats every entry as an equal player.
- */
 export const PALETTES: Palette[] = [
   {
     name: "Dogpatch 97",

@@ -28,12 +28,10 @@ export function rgbToHex([r, g, b]: number[]) {
     .join("")}`;
 }
 
-/** Perceived brightness in 0-255. */
 export function luminance([r, g, b]: number[]) {
   return r * 0.2126 + g * 0.7152 + b * 0.0722;
 }
 
-/** Distance in flat RGB. Good enough for clustering swatches. */
 export function colorDistance(a: number[], b: number[]) {
   const dr = a[0] - b[0];
   const dg = a[1] - b[1];
@@ -47,20 +45,6 @@ export function mix(a: string, b: string, t: number) {
   return rgbToHex(from.map((channel, i) => channel + (to[i] - channel) * t));
 }
 
-/** Ink that stays readable on `background` — paper white or press black. */
-export function inkOn(background: string, light = "#faf8f3", dark = "#141210") {
-  return luminance(hexToRgb(background)) > 150 ? dark : light;
-}
-
-export function saturation(color: string) {
-  const [r, g, b] = hexToRgb(color);
-  return Math.max(r, g, b) - Math.min(r, g, b);
-}
-
-/**
- * Pull five dominant colors out of an image with a small k-means pass, seeded
- * by luminance percentiles so the result is stable across runs.
- */
 export function extractPalette(
   image: HTMLImageElement,
   name: string,
@@ -88,7 +72,7 @@ export function extractPalette(
     const light = luminance(rgb);
     const chroma = Math.max(...rgb) - Math.min(...rgb);
 
-    // Drop blown-out paper white; it is the scan, not the artwork.
+    // Blown-out white is the scan, not the artwork.
     if (light > 244 && chroma < 18) continue;
     samples.push(rgb);
   }
@@ -136,12 +120,7 @@ export function extractPalette(
   return { name, colors };
 }
 
-/**
- * Resample a palette into a tonal ramp of exactly `steps` colours, ordered
- * light to dark so quantisation bands read as a sequence rather than a
- * scatter. Asking for no more colours than the palette holds keeps the real
- * swatches intact; asking for more interpolates between neighbours.
- */
+// Ordered light to dark so quantisation bands read as a tonal sequence.
 export function buildRamp(colors: string[], steps: number) {
   const count = Math.max(2, Math.min(24, Math.round(steps)));
   if (colors.length === 0)

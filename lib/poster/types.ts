@@ -1,6 +1,5 @@
 export type Family = "cover" | "poster";
 
-/** Procedural field used by the cover family. */
 export type FieldVariant =
   | "contour"
   | "topo"
@@ -13,10 +12,8 @@ export type FieldVariant =
   | "burst"
   | "blocks";
 
-/** Sheet layout for the cover family. */
 export type CoverVariant = "specimen" | "bleed" | "index";
 
-/** Sheet layout for the modular colour-grid family. */
 export type PosterVariant =
   | "stack"
   | "overlay"
@@ -30,19 +27,13 @@ export type Palette = {
 };
 
 export type Copy = {
-  /** Primary headline. */
   title: string;
-  /** Secondary headline, set at the same weight. */
   subtitle: string;
-  /** Small attribution line under the title. */
   kicker: string;
-  /** Year or catalogue number. */
   meta: string;
   body: string;
   bodyAlt: string;
-  /** Address / venue line set in tracked micro-caps. */
   footer: string;
-  /** Rights line. */
   mark: string;
 };
 
@@ -52,17 +43,14 @@ export type PosterSpec = {
   coverVariant: CoverVariant;
   posterVariant: PosterVariant;
   seed: number;
-  /** Field frequency. */
+  // density: field frequency. warp: domain warp for fields, block
+  // displacement for grids. bands: quantisation steps. scan: horizontal
+  // slicing. drift: animation speed. grain: paper texture strength.
   density: number;
-  /** Domain warp for fields; block displacement for grids. */
   warp: number;
-  /** Number of quantisation steps the field collapses into. */
   bands: number;
-  /** Horizontal slicing / glitch. */
   scan: number;
-  /** Animation speed. */
   drift: number;
-  /** Paper texture strength. */
   grain: number;
   palette: Palette;
   sourceName: string;
@@ -80,6 +68,5 @@ export type RenderContext = {
   sheet: Sheet;
   source: HTMLImageElement | null;
   time: number;
-  /** Pixel resolution of the procedural field buffer. */
   resolution: number;
 };
