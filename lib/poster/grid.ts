@@ -1,4 +1,4 @@
-import { hexToRgb, inkOn, luminance } from "@/lib/poster/color";
+import { inkOn } from "@/lib/poster/color";
 import { createRng } from "@/lib/poster/rng";
 
 export type Rect = { x: number; y: number; width: number; height: number };
@@ -140,51 +140,6 @@ export function paintGrid(ctx: CanvasRenderingContext2D, blocks: Block[]) {
     ctx.fillStyle = block.color;
     ctx.fillRect(block.x, block.y, block.width, block.height);
   }
-}
-
-export function colorAt(blocks: Block[], x: number, y: number) {
-  for (const block of blocks) {
-    if (
-      x >= block.x &&
-      x < block.x + block.width &&
-      y >= block.y &&
-      y < block.y + block.height
-    ) {
-      return block.color;
-    }
-  }
-  return null;
-}
-
-// Samples the whole area, not one point, so a headline straddling a light and a
-// dark block still gets legible ink.
-export function inkForRegion(
-  blocks: Block[],
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-  light = "#faf8f3",
-  dark = "#141210",
-) {
-  let total = 0;
-  let samples = 0;
-
-  for (let column = 0; column <= 6; column++) {
-    for (let row = 0; row <= 2; row++) {
-      const color = colorAt(
-        blocks,
-        x + (width * column) / 6,
-        y + (height * row) / 2,
-      );
-      if (!color) continue;
-      total += luminance(hexToRgb(color));
-      samples += 1;
-    }
-  }
-
-  if (!samples) return dark;
-  return total / samples > 145 ? dark : light;
 }
 
 // Repeats `draw` once per background it crosses — every overlapping block, plus
