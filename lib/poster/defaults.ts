@@ -136,7 +136,7 @@ export const POSTER_DEFAULTS: FieldDefaults = {
   warp: 0.55,
   bands: 6,
   scan: 0,
-  drift: 0.2,
+  drift: 0.5,
   grain: 0.62,
 };
 

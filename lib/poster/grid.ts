@@ -46,10 +46,12 @@ function animate(
   offset: number,
 ) {
   if (warp <= 0.001) return weights;
+  // Capped below 1 so a block can never be modulated down to nothing.
+  const swing = Math.min(0.85, warp * 0.35);
   return normalise(
     weights.map(
       (value, index) =>
-        value * (1 + Math.sin(phase + offset + index * 2.1) * warp * 0.09),
+        value * (1 + Math.sin(phase + offset + index * 2.1) * swing),
     ),
   );
 }
