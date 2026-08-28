@@ -84,16 +84,5 @@ export function useSheetRenderer({ spec, source, animated }: Options) {
     return () => cancelAnimationFrame(frame);
   }, [spec, source, animated, fontsReady]);
 
-  const redraw = React.useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    renderSheet(canvas, spec, {
-      source,
-      time: timeRef.current,
-      scale: PREVIEW_SCALE,
-      resolution: PREVIEW_RESOLUTION,
-    });
-  }, [spec, source]);
-
-  return { canvasRef, timeRef, redraw, fontsReady };
+  return { canvasRef, timeRef, fontsReady };
 }

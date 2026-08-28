@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import {
-  ArrowsClockwiseIcon,
   DownloadSimpleIcon,
   PauseIcon,
   PlayIcon,
@@ -55,7 +54,7 @@ export function Studio() {
   const [animated, setAnimated] = React.useState(false);
   const [exporting, setExporting] = React.useState(false);
 
-  const { canvasRef, timeRef, redraw } = useSheetRenderer({
+  const { canvasRef, timeRef } = useSheetRenderer({
     spec,
     source,
     animated,
@@ -163,12 +162,7 @@ export function Studio() {
   return (
     <div className="flex h-dvh flex-col overflow-hidden">
       <header className="flex shrink-0 items-center gap-4 border-b px-5 py-3">
-        <div className="flex items-baseline gap-3">
-          <span className="text-base font-medium tracking-tight">Poster</span>
-          <span className="hidden font-mono text-xs text-muted-foreground sm:inline">
-            generative print studio
-          </span>
-        </div>
+        <span className="text-base font-medium tracking-tight">Poster</span>
 
         <Badge
           variant="secondary"
@@ -196,22 +190,6 @@ export function Studio() {
             <TooltipContent>
               {animated ? "Pause motion" : "Play motion"}
             </TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  aria-label="Redraw"
-                  onClick={redraw}
-                />
-              }
-            >
-              <ArrowsClockwiseIcon />
-            </TooltipTrigger>
-            <TooltipContent>Redraw</TooltipContent>
           </Tooltip>
 
           <Button variant="outline" size="sm" onClick={shuffleAll}>
