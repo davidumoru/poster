@@ -1,4 +1,4 @@
-import { hexToRgb, luminance } from "@/lib/poster/color";
+import { hexToRgb, inkOn, luminance } from "@/lib/poster/color";
 import { createRng } from "@/lib/poster/rng";
 
 export type Rect = { x: number; y: number; width: number; height: number };
@@ -185,4 +185,44 @@ export function inkForRegion(
 
   if (!samples) return dark;
   return total / samples > 145 ? dark : light;
+}
+
+// Repeats `draw` once per background it crosses — every overlapping block, plus
+// the paper outside the grid — clipped and inked for each, so text spanning a
+// pale block and a dark one stays readable throughout.
+export function paintOverBlocks(
+  ctx: CanvasRenderingContext2D,
+  blocks: Block[],
+  area: Rect,
+  bounds: Rect,
+  paperInk: string,
+  draw: () => void,
+) {
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(-1e4, -1e4, 2e4, 2e4);
+  ctx.rect(area.x, area.y, area.width, area.height);
+  ctx.clip("evenodd");
+  ctx.fillStyle = paperInk;
+  draw();
+  ctx.restore();
+
+  for (const block of blocks) {
+    if (
+      block.x > bounds.x + bounds.width ||
+      block.x + block.width < bounds.x ||
+      block.y > bounds.y + bounds.height ||
+      block.y + block.height < bounds.y
+    ) {
+      continue;
+    }
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(block.x, block.y, block.width, block.height);
+    ctx.clip();
+    ctx.fillStyle = inkOn(block.color);
+    draw();
+    ctx.restore();
+  }
 }

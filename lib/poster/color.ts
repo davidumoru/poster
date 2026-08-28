@@ -45,6 +45,10 @@ export function mix(a: string, b: string, t: number) {
   return rgbToHex(from.map((channel, i) => channel + (to[i] - channel) * t));
 }
 
+export function inkOn(background: string, light = "#faf8f3", dark = "#141210") {
+  return luminance(hexToRgb(background)) > 145 ? dark : light;
+}
+
 export function extractPalette(
   image: HTMLImageElement,
   name: string,

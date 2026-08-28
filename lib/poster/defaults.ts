@@ -37,8 +37,13 @@ export const COVER_VARIANTS: { id: CoverVariant; label: string }[] = [
 
 export const POSTER_VARIANTS: { id: PosterVariant; label: string }[] = [
   { id: "stack", label: "Stack" },
+  { id: "notch", label: "Notch" },
+  { id: "panel", label: "Panel" },
   { id: "overlay", label: "Overlay" },
+  { id: "masthead", label: "Masthead" },
+  { id: "rotated", label: "Rotated" },
   { id: "sidebar", label: "Sidebar" },
+  { id: "ledger", label: "Ledger" },
   { id: "banner", label: "Banner" },
   { id: "diptych", label: "Diptych" },
 ];

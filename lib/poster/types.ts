@@ -16,8 +16,13 @@ export type CoverVariant = "specimen" | "bleed" | "index";
 
 export type PosterVariant =
   | "stack"
+  | "notch"
+  | "panel"
   | "overlay"
+  | "masthead"
+  | "rotated"
   | "sidebar"
+  | "ledger"
   | "banner"
   | "diptych";
 

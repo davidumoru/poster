@@ -1,7 +1,7 @@
 import {
   buildGrid,
-  inkForRegion,
   paintGrid,
+  paintOverBlocks,
   type Rect,
 } from "@/lib/poster/grid";
 import {
@@ -125,12 +125,12 @@ function drawBodyPair(
   y: number,
   width: number,
   lines: number,
-  ink = INK,
+  ink: string | null = INK,
 ) {
   const { ctx, spec } = context;
   const gap = 62;
   const columnWidth = (width - gap) / 2;
-  ctx.fillStyle = ink;
+  if (ink) ctx.fillStyle = ink;
   ctx.font = font("serif", 400, BODY_SIZE);
   drawParagraph(ctx, spec.copy.body, {
     x,
@@ -180,6 +180,8 @@ function drawOverlay(context: RenderContext) {
   const { ctx, spec } = context;
   const rect = { x: MARGIN, y: MARGIN, width: LIVE_WIDTH, height: 1180 };
   const blocks = paintField(context, rect);
+  const over = (bounds: Rect, draw: () => void) =>
+    paintOverBlocks(ctx, blocks, rect, bounds, INK, draw);
 
   const titleX = MARGIN + 38;
   const titleY = MARGIN + 140;
@@ -193,57 +195,74 @@ function drawOverlay(context: RenderContext) {
     24,
   );
   const titleWidth = ctx.measureText(spec.copy.title).width;
-  ctx.fillStyle = inkForRegion(
-    blocks,
-    titleX,
-    titleY - titleSize * 0.76,
-    titleWidth,
-    titleSize,
+  over(
+    {
+      x: titleX,
+      y: titleY - titleSize * 0.8,
+      width: titleWidth,
+      height: titleSize,
+    },
+    () => ctx.fillText(spec.copy.title, titleX, titleY),
   );
-  ctx.fillText(spec.copy.title, titleX, titleY);
 
   const columnWidth = 250;
   const bodyY = titleY + 70;
+  const bodyLines = 11;
   ctx.font = font("serif", 400, 14.5);
-  ctx.fillStyle = inkForRegion(blocks, titleX, bodyY - 12, columnWidth, 200);
-  drawParagraph(ctx, spec.copy.body, {
-    x: titleX,
-    y: bodyY,
-    width: columnWidth,
-    lineHeight: 18,
-    maxLines: 11,
-    align: "justify",
-  });
+  over(
+    { x: titleX, y: bodyY - 14, width: columnWidth, height: bodyLines * 18 },
+    () =>
+      drawParagraph(ctx, spec.copy.body, {
+        x: titleX,
+        y: bodyY,
+        width: columnWidth,
+        lineHeight: 18,
+        maxLines: bodyLines,
+        align: "justify",
+      }),
+  );
 
   const subtitleX = MARGIN + LIVE_WIDTH * 0.36;
   const subtitleY = MARGIN + 800;
   ctx.font = font("sans", 400, titleSize);
   const subtitleWidth = ctx.measureText(spec.copy.subtitle).width;
-  ctx.fillStyle = inkForRegion(
-    blocks,
-    subtitleX,
-    subtitleY - titleSize * 0.76,
-    subtitleWidth,
-    titleSize,
+  over(
+    {
+      x: subtitleX,
+      y: subtitleY - titleSize * 0.8,
+      width: subtitleWidth,
+      height: titleSize,
+    },
+    () => {
+      ctx.font = font("sans", 400, titleSize);
+      ctx.fillText(spec.copy.subtitle, subtitleX, subtitleY);
+    },
   );
-  ctx.fillText(spec.copy.subtitle, subtitleX, subtitleY);
 
   const altY = subtitleY + 70;
   ctx.font = font("serif", 400, 14.5);
-  ctx.fillStyle = inkForRegion(blocks, subtitleX, altY - 12, columnWidth, 200);
-  drawParagraph(ctx, spec.copy.bodyAlt, {
-    x: subtitleX,
-    y: altY,
-    width: columnWidth,
-    lineHeight: 18,
-    maxLines: 11,
-    align: "justify",
-  });
+  over(
+    { x: subtitleX, y: altY - 14, width: columnWidth, height: bodyLines * 18 },
+    () => {
+      ctx.font = font("serif", 400, 14.5);
+      drawParagraph(ctx, spec.copy.bodyAlt, {
+        x: subtitleX,
+        y: altY,
+        width: columnWidth,
+        lineHeight: 18,
+        maxLines: bodyLines,
+        align: "justify",
+      });
+    },
+  );
 
   const footerY = rect.y + rect.height - 26;
   ctx.font = font("sans", 500, 13);
-  ctx.fillStyle = inkForRegion(blocks, titleX, footerY - 12, 420, 16);
-  drawTracked(ctx, spec.copy.footer.toUpperCase(), titleX, footerY, 2.4);
+  over({ x: titleX, y: footerY - 14, width: 460, height: 18 }, () => {
+    ctx.font = font("sans", 500, 13);
+    drawTracked(ctx, spec.copy.footer.toUpperCase(), titleX, footerY, 2.4);
+  });
+
   drawColophon(context, POSTER_SHEET.height - MARGIN, MARGIN + LIVE_WIDTH);
 }
 
@@ -330,6 +349,285 @@ function drawBanner(context: RenderContext) {
   drawRail(context);
 }
 
+function drawNotch(context: RenderContext) {
+  const { ctx, spec } = context;
+  const gridHeight = 1180;
+  paintField(context, {
+    x: MARGIN,
+    y: MARGIN,
+    width: LIVE_WIDTH,
+    height: gridHeight,
+  });
+
+  const notchY = MARGIN + 330;
+  const notchWidth = LIVE_WIDTH * 0.76;
+  ctx.fillStyle = PAPER;
+  ctx.fillRect(MARGIN, notchY, notchWidth, MARGIN + gridHeight - notchY + 1);
+
+  const inner = notchWidth - 48;
+  const columnWidth = (inner - 44) / 2;
+
+  ctx.fillStyle = INK;
+  fitSize(ctx, spec.copy.title, inner, "sans", 400, 54, 24);
+  ctx.fillText(spec.copy.title, MARGIN + 24, notchY + 78);
+
+  ctx.font = font("serif", 400, BODY_SIZE);
+  drawParagraph(ctx, spec.copy.body, {
+    x: MARGIN + 24,
+    y: notchY + 132,
+    width: columnWidth,
+    lineHeight: BODY_LEADING,
+    maxLines: 14,
+    align: "justify",
+  });
+  drawParagraph(ctx, spec.copy.bodyAlt, {
+    x: MARGIN + 24 + columnWidth + 44,
+    y: notchY + 246,
+    width: columnWidth,
+    lineHeight: BODY_LEADING,
+    maxLines: 14,
+    align: "justify",
+  });
+
+  const size = fitSize(ctx, spec.copy.subtitle, inner, "sans", 400, 54, 24);
+  ctx.fillText(
+    spec.copy.subtitle,
+    MARGIN + 24 + inner - ctx.measureText(spec.copy.subtitle).width,
+    MARGIN + gridHeight - 96,
+  );
+  void size;
+
+  drawColophon(context, POSTER_SHEET.height - MARGIN, MARGIN + LIVE_WIDTH);
+  drawRail(context);
+}
+
+function drawMasthead(context: RenderContext) {
+  const { ctx, spec } = context;
+  const rect = { x: MARGIN, y: MARGIN, width: LIVE_WIDTH, height: 1180 };
+  const blocks = paintField(context, rect);
+  const over = (bounds: Rect, draw: () => void) =>
+    paintOverBlocks(ctx, blocks, rect, bounds, INK, draw);
+
+  const right = MARGIN + LIVE_WIDTH - 34;
+  const titleSize = fitSize(
+    ctx,
+    spec.copy.title,
+    LIVE_WIDTH * 0.78,
+    "sans",
+    400,
+    62,
+    26,
+  );
+  const titleWidth = ctx.measureText(spec.copy.title).width;
+  const titleBaseline = MARGIN + 42 + titleSize * 0.78;
+  over(
+    {
+      x: right - titleWidth,
+      y: titleBaseline - titleSize * 0.8,
+      width: titleWidth,
+      height: titleSize,
+    },
+    () => {
+      ctx.font = font("sans", 400, titleSize);
+      ctx.fillText(spec.copy.title, right - titleWidth, titleBaseline);
+    },
+  );
+
+  ctx.font = font("sans", 400, 26);
+  const subtitleWidth = ctx.measureText(spec.copy.subtitle).width;
+  over(
+    {
+      x: right - subtitleWidth,
+      y: titleBaseline + 24,
+      width: subtitleWidth,
+      height: 28,
+    },
+    () => {
+      ctx.font = font("sans", 400, 26);
+      ctx.fillText(
+        spec.copy.subtitle,
+        right - subtitleWidth,
+        titleBaseline + 46,
+      );
+    },
+  );
+
+  const bodyX = MARGIN + LIVE_WIDTH * 0.28;
+  const bodyWidth = LIVE_WIDTH * 0.68;
+  const bodyY = MARGIN + 1010;
+  const lines = 8;
+  over(
+    { x: bodyX, y: bodyY - 16, width: bodyWidth, height: lines * BODY_LEADING },
+    () => drawBodyPair(context, bodyX, bodyY, bodyWidth, lines, null),
+  );
+
+  drawColophon(context, POSTER_SHEET.height - MARGIN, MARGIN + LIVE_WIDTH);
+}
+
+function drawRotated(context: RenderContext) {
+  const { ctx, spec } = context;
+  const gridHeight = 1180;
+  const rect = { x: MARGIN, y: MARGIN, width: LIVE_WIDTH, height: gridHeight };
+  const blocks = paintField(context, rect);
+  const over = (bounds: Rect, draw: () => void) =>
+    paintOverBlocks(ctx, blocks, rect, bounds, INK, draw);
+
+  ctx.font = font("sans", 400, 36);
+  const subtitleWidth = ctx.measureText(spec.copy.subtitle).width;
+  over(
+    { x: MARGIN + 34, y: MARGIN + 40, width: subtitleWidth, height: 44 },
+    () => {
+      ctx.font = font("sans", 400, 36);
+      ctx.fillText(spec.copy.subtitle, MARGIN + 34, MARGIN + 74);
+    },
+  );
+
+  const titleX = MARGIN + 92;
+  const titleSize = fitSize(
+    ctx,
+    spec.copy.title,
+    gridHeight - 240,
+    "sans",
+    400,
+    78,
+    30,
+  );
+  const titleLength = ctx.measureText(spec.copy.title).width;
+  const titleFoot = MARGIN + gridHeight - 46;
+  over(
+    {
+      x: titleX - titleSize * 0.8,
+      y: titleFoot - titleLength,
+      width: titleSize,
+      height: titleLength,
+    },
+    () => {
+      ctx.font = font("sans", 400, titleSize);
+      rotated(ctx, titleX, titleFoot, -Math.PI / 2, () => {
+        ctx.fillText(spec.copy.title, 0, 0);
+      });
+    },
+  );
+
+  const bodyX = MARGIN + LIVE_WIDTH * 0.46;
+  const bodyWidth = 178;
+  const leading = 17.5;
+  const lines = 12;
+  const firstY = MARGIN + 430;
+  const secondY = MARGIN + 710;
+
+  ctx.font = font("serif", 400, 14);
+  for (const column of [
+    { text: spec.copy.bodyAlt, y: firstY },
+    { text: spec.copy.body, y: secondY },
+  ]) {
+    over(
+      {
+        x: bodyX,
+        y: column.y - 14,
+        width: bodyWidth,
+        height: lines * leading,
+      },
+      () => {
+        ctx.font = font("serif", 400, 14);
+        drawParagraph(ctx, column.text, {
+          x: bodyX,
+          y: column.y,
+          width: bodyWidth,
+          lineHeight: leading,
+          maxLines: lines,
+          align: "justify",
+        });
+      },
+    );
+  }
+
+  drawColophon(context, POSTER_SHEET.height - MARGIN, MARGIN + LIVE_WIDTH);
+}
+
+function drawPanel(context: RenderContext) {
+  const { ctx, spec } = context;
+  const gridHeight = 1180;
+  paintField(context, {
+    x: MARGIN,
+    y: MARGIN,
+    width: LIVE_WIDTH,
+    height: gridHeight,
+  });
+
+  // Deliberately off-centre: more colour to the right and below the panel.
+  const panelX = MARGIN + 48;
+  const panelY = MARGIN + 380;
+  const panelWidth = LIVE_WIDTH - 168;
+  const panelHeight = 560;
+
+  ctx.fillStyle = PAPER;
+  ctx.fillRect(panelX, panelY, panelWidth, panelHeight);
+  paperTexture(ctx, panelX, panelY, panelWidth, panelHeight, {
+    seed: spec.seed + 7,
+    intensity: spec.grain * 0.5,
+    creases: false,
+  });
+
+  const pad = 44;
+  const innerX = panelX + pad;
+  const innerWidth = panelWidth - pad * 2;
+
+  ctx.fillStyle = INK;
+  const titleSize = fitSize(
+    ctx,
+    spec.copy.title,
+    innerWidth,
+    "sans",
+    400,
+    50,
+    22,
+  );
+  ctx.fillText(spec.copy.title, innerX, panelY + pad + titleSize * 0.8);
+
+  drawBodyPair(context, innerX, panelY + pad + titleSize + 60, innerWidth, 12);
+
+  ctx.fillStyle = INK;
+  fitSize(ctx, spec.copy.subtitle, innerWidth, "sans", 400, 40, 20);
+  ctx.fillText(
+    spec.copy.subtitle,
+    innerX + innerWidth - ctx.measureText(spec.copy.subtitle).width,
+    panelY + panelHeight - pad,
+  );
+
+  drawColophon(context, POSTER_SHEET.height - MARGIN, MARGIN + LIVE_WIDTH);
+  drawRail(context);
+}
+
+function drawLedger(context: RenderContext) {
+  const { ctx, spec } = context;
+  const paperWidth = 424;
+  const gridX = MARGIN + paperWidth + 48;
+
+  paintField(context, {
+    x: gridX,
+    y: MARGIN,
+    width: POSTER_SHEET.width - MARGIN - gridX,
+    height: 1180,
+  });
+
+  ctx.fillStyle = INK;
+  fitSize(ctx, spec.copy.title, paperWidth, "sans", 400, 46, 22);
+  ctx.fillText(spec.copy.title, MARGIN, MARGIN + 64);
+
+  drawBodyPair(context, MARGIN, MARGIN + 176, paperWidth, 16);
+
+  fitSize(ctx, spec.copy.subtitle, paperWidth, "sans", 400, 46, 22);
+  ctx.fillStyle = INK;
+  ctx.fillText(spec.copy.subtitle, MARGIN, MARGIN + 960);
+
+  drawColophon(
+    context,
+    POSTER_SHEET.height - MARGIN,
+    POSTER_SHEET.width - MARGIN,
+  );
+}
+
 function drawDiptych(context: RenderContext) {
   const { ctx, spec, time } = context;
 
@@ -410,6 +708,21 @@ export function drawPosterSheet(context: RenderContext) {
       break;
     case "banner":
       drawBanner(context);
+      break;
+    case "notch":
+      drawNotch(context);
+      break;
+    case "panel":
+      drawPanel(context);
+      break;
+    case "masthead":
+      drawMasthead(context);
+      break;
+    case "rotated":
+      drawRotated(context);
+      break;
+    case "ledger":
+      drawLedger(context);
       break;
     case "diptych":
       drawDiptych(context);
