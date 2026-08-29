@@ -47,6 +47,12 @@ function pick<T>(items: readonly T[]) {
   return items[Math.floor(Math.random() * items.length)];
 }
 
+// Shuffle leaves the palette alone only while it is the one taken from the
+// uploaded image; a hand-picked preset is fair game.
+function keepsPalette(spec: PosterSpec) {
+  return Boolean(spec.sourceName) && spec.palette.name === spec.sourceName;
+}
+
 export function Studio() {
   const [spec, setSpec] = React.useState<PosterSpec>(DEFAULT_SPEC);
   const [source, setSource] = React.useState<HTMLImageElement | null>(null);
@@ -110,6 +116,24 @@ export function Studio() {
     reader.readAsDataURL(file);
   }, []);
 
+  const clearSource = React.useCallback(() => {
+    setSource(null);
+    setSourceUrl(null);
+    setSpec((current) => ({
+      ...current,
+      sourceName: "",
+      palette: DEFAULT_SPEC.palette,
+    }));
+  }, []);
+
+  const extractFromSource = React.useCallback(() => {
+    if (!source) return;
+    setSpec((current) => ({
+      ...current,
+      palette: extractPalette(source, current.sourceName, DEFAULT_PALETTE),
+    }));
+  }, [source]);
+
   const shuffleAll = React.useCallback(() => {
     setSpec((current) => {
       if (current.family === "cover") {
@@ -119,7 +143,7 @@ export function Studio() {
           fieldVariant,
           coverVariant: pick(COVER_VARIANTS).id,
           seed: randomSeed(),
-          palette: current.sourceName ? current.palette : pick(PALETTES),
+          palette: keepsPalette(current) ? current.palette : pick(PALETTES),
           ...FIELD_DEFAULTS[fieldVariant],
         };
       }
@@ -128,7 +152,7 @@ export function Studio() {
         ...current,
         posterVariant: pick(POSTER_VARIANTS).id,
         seed: randomSeed(),
-        palette: current.sourceName ? current.palette : pick(PALETTES),
+        palette: keepsPalette(current) ? current.palette : pick(PALETTES),
       };
     });
   }, []);
@@ -232,6 +256,8 @@ export function Studio() {
               onSeed={(seed) => patch({ seed })}
               onShuffleSeed={() => patch({ seed: randomSeed() })}
               onFile={loadFile}
+              onClearSource={clearSource}
+              onExtractFromSource={extractFromSource}
               onCopy={(key: keyof Copy, value: string) =>
                 setSpec((current) => ({
                   ...current,

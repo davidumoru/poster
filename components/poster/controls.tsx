@@ -37,6 +37,8 @@ export type ControlsProps = {
   onSeed: (seed: number) => void;
   onShuffleSeed: () => void;
   onFile: (file: File) => void;
+  onClearSource: () => void;
+  onExtractFromSource: () => void;
   onCopy: (key: keyof Copy, value: string) => void;
 };
 
@@ -178,6 +180,8 @@ export function Controls(props: ControlsProps) {
             onSeed={props.onSeed}
             onShuffleSeed={props.onShuffleSeed}
             onFile={props.onFile}
+            onClearSource={props.onClearSource}
+            onExtractFromSource={props.onExtractFromSource}
           />
         </TabsContent>
 

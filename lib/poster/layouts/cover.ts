@@ -193,7 +193,7 @@ function drawIndex(context: RenderContext) {
     ["FIELD", spec.fieldVariant],
     ["SEED", String(spec.seed)],
     ["BANDS", String(spec.bands)],
-    ["SOURCE", spec.sourceName || spec.palette.name],
+    ["SOURCE", spec.palette.name],
   ];
 
   let rowY = swatchY + 62;

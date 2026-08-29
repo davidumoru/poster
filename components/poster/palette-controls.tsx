@@ -1,8 +1,14 @@
 "use client";
 
 import * as React from "react";
-import { ShuffleIcon, UploadSimpleIcon } from "@phosphor-icons/react";
+import {
+  EyedropperIcon,
+  ShuffleIcon,
+  UploadSimpleIcon,
+  XIcon,
+} from "@phosphor-icons/react";
 
+import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldTitle } from "@/components/ui/field";
 import {
   InputGroup,
@@ -12,6 +18,7 @@ import {
 } from "@/components/ui/input-group";
 import {
   Item,
+  ItemActions,
   ItemContent,
   ItemDescription,
   ItemMedia,
@@ -28,6 +35,8 @@ type PaletteControlsProps = {
   onSeed: (seed: number) => void;
   onShuffleSeed: () => void;
   onFile: (file: File) => void;
+  onClearSource: () => void;
+  onExtractFromSource: () => void;
 };
 
 export function PaletteControls({
@@ -37,7 +46,13 @@ export function PaletteControls({
   onSeed,
   onShuffleSeed,
   onFile,
+  onClearSource,
+  onExtractFromSource,
 }: PaletteControlsProps) {
+  // extractPalette names the palette after the file, so the two match exactly
+  // while the palette is still the one taken from the image.
+  const paletteFromSource =
+    Boolean(spec.sourceName) && spec.palette.name === spec.sourceName;
   const fileRef = React.useRef<HTMLInputElement>(null);
 
   return (
@@ -94,30 +109,57 @@ export function PaletteControls({
             event.target.value = "";
           }}
         />
-        <Item
-          variant="outline"
-          size="sm"
-          render={
-            <button type="button" onClick={() => fileRef.current?.click()} />
-          }
-          className="text-left hover:bg-muted/60"
-        >
-          <ItemMedia variant="image">
-            {sourceUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={sourceUrl} alt="" />
-            ) : (
-              <UploadSimpleIcon className="size-4 text-muted-foreground" />
-            )}
-          </ItemMedia>
-          <ItemContent>
-            <ItemTitle className="truncate">
-              {spec.sourceName || "Choose an image"}
-            </ItemTitle>
-            <ItemDescription>
-              Its dominant colours become the palette.
-            </ItemDescription>
-          </ItemContent>
+        <Item variant="outline" size="sm" className="p-0">
+          {/* The row is the picker, so the clear action sits outside it —
+              a button cannot contain another button. */}
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            className="flex flex-1 items-center gap-2.5 rounded-md px-3 py-2.5 text-left hover:bg-muted/60"
+          >
+            <ItemMedia variant="image">
+              {sourceUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={sourceUrl} alt="" />
+              ) : (
+                <UploadSimpleIcon className="size-4 text-muted-foreground" />
+              )}
+            </ItemMedia>
+            <ItemContent>
+              <ItemTitle className="truncate">
+                {spec.sourceName || "Choose an image"}
+              </ItemTitle>
+              <ItemDescription>
+                {!sourceUrl
+                  ? "Its dominant colours become the palette."
+                  : paletteFromSource
+                    ? "Palette taken from this image."
+                    : "Used as artwork. Palette is set above."}
+              </ItemDescription>
+            </ItemContent>
+          </button>
+          {sourceUrl ? (
+            <ItemActions className="pr-2">
+              {paletteFromSource ? null : (
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label="Use this image's colours"
+                  onClick={onExtractFromSource}
+                >
+                  <EyedropperIcon />
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                aria-label="Remove image"
+                onClick={onClearSource}
+              >
+                <XIcon />
+              </Button>
+            </ItemActions>
+          ) : null}
         </Item>
         <div className="flex gap-1.5">
           {spec.palette.colors.map((color, index) => (
