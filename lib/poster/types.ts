@@ -48,9 +48,6 @@ export type PosterSpec = {
   coverVariant: CoverVariant;
   posterVariant: PosterVariant;
   seed: number;
-  // density: field frequency. warp: domain warp for fields, block
-  // displacement for grids. bands: quantisation steps. scan: horizontal
-  // slicing. drift: animation speed. grain: paper texture strength.
   density: number;
   warp: number;
   bands: number;

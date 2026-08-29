@@ -27,8 +27,7 @@ export function OptionGrid<T extends string>({
       size="sm"
       value={[value]}
       onValueChange={(next) => {
-        // Base UI clears the array when the active item is pressed again, but
-        // something always has to be selected here.
+        // Base UI clears the array when the active item is pressed again.
         const [picked] = next;
         if (picked) onChange(picked as T);
       }}

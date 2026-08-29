@@ -14,7 +14,6 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// Text serif for the justified essay columns on the poster family.
 const newsreader = Newsreader({
   variable: "--font-newsreader",
   subsets: ["latin"],

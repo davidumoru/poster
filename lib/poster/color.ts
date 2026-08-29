@@ -124,7 +124,6 @@ export function extractPalette(
   return { name, colors };
 }
 
-// Ordered light to dark so quantisation bands read as a tonal sequence.
 export function buildRamp(colors: string[], steps: number) {
   const count = Math.max(2, Math.min(24, Math.round(steps)));
   if (colors.length === 0)

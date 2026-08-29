@@ -1,6 +1,3 @@
-// Integer mixing rather than the usual `sin(n) * 43758.5`: the field renderer
-// calls this millions of times per frame, where `Math.sin` is an order of
-// magnitude slower.
 export function hash(n: number) {
   let x = (n * 65536) | 0;
   x = Math.imul(x ^ (x >>> 15), 0x2c1b3c6d);

@@ -4,9 +4,7 @@ import type { PosterSpec, Sheet } from "@/lib/poster/types";
 
 export type RenderOptions = {
   source?: HTMLImageElement | null;
-  /** Seconds. */
   time?: number;
-  /** Device pixels per sheet unit. */
   scale?: number;
   resolution?: number;
 };

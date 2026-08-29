@@ -4,8 +4,6 @@ const TILE = 256;
 let grainTile: HTMLCanvasElement | null = null;
 let blotchTile: HTMLCanvasElement | null = null;
 
-// Neutral grey: under `overlay`, mid-grey is a no-op, so the tile lightens and
-// darkens whatever sits underneath without tinting it.
 function getGrainTile() {
   if (grainTile) return grainTile;
 

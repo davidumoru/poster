@@ -5,8 +5,6 @@ export type Rect = { x: number; y: number; width: number; height: number };
 
 export type Block = Rect & { color: string; column: number; row: number };
 
-// Hand-tuned rather than random: one dominant field, one supporting field and a
-// few narrow strips is what makes a composition read as designed.
 const COLUMN_RHYTHMS = [
   [0.4, 0.33, 0.11, 0.09, 0.07],
   [0.46, 0.35, 0.19],
@@ -38,7 +36,6 @@ function jitter(weights: number[], rng: () => number, amount: number) {
   );
 }
 
-// Renormalised, so nudging a shared edge never opens a gap between blocks.
 function animate(
   weights: number[],
   phase: number,
@@ -46,7 +43,6 @@ function animate(
   offset: number,
 ) {
   if (warp <= 0.001) return weights;
-  // Capped below 1 so a block can never be modulated down to nothing.
   const swing = Math.min(0.85, warp * 0.35);
   return normalise(
     weights.map(
@@ -142,9 +138,7 @@ export function paintGrid(ctx: CanvasRenderingContext2D, blocks: Block[]) {
   }
 }
 
-// Repeats `draw` once per background it crosses — every overlapping block, plus
-// the paper outside the grid — clipped and inked for each, so text spanning a
-// pale block and a dark one stays readable throughout.
+// Calls `draw` once per background it crosses, clipped and inked for each.
 export function paintOverBlocks(
   ctx: CanvasRenderingContext2D,
   blocks: Block[],

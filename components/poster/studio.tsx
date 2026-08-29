@@ -47,8 +47,6 @@ function pick<T>(items: readonly T[]) {
   return items[Math.floor(Math.random() * items.length)];
 }
 
-// Shuffle leaves the palette alone only while it is the one taken from the
-// uploaded image; a hand-picked preset is fair game.
 function keepsPalette(spec: PosterSpec) {
   return Boolean(spec.sourceName) && spec.palette.name === spec.sourceName;
 }
@@ -195,7 +193,11 @@ export function Studio() {
           {variantLabel} · {sheet.width}×{sheet.height} · {spec.seed}
         </Badge>
 
-        <Separator orientation="vertical" className="hidden h-6 md:block" />
+        <Separator
+          orientation="vertical"
+          // Needs the data-vertical prefix or twMerge keeps the base self-stretch.
+          className="hidden h-6 data-vertical:self-center md:block"
+        />
 
         <div className="ml-auto flex items-center gap-1.5 md:ml-0">
           <Tooltip>
@@ -204,6 +206,7 @@ export function Studio() {
                 <Button
                   variant="ghost"
                   size="icon-sm"
+                  className="-ml-2"
                   aria-label={animated ? "Pause motion" : "Play motion"}
                   onClick={() => setAnimated((value) => !value)}
                 />

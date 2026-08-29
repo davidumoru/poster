@@ -8,9 +8,8 @@ const FALLBACKS: Record<FontRole, string> = {
 
 let stacks: Record<FontRole, string> | null = null;
 
-// Canvas cannot resolve `var(--font-sans)` inside `ctx.font`, so the concrete
-// family names are read off a probe element. Without this every sheet
-// silently falls back to the system default.
+// ctx.font cannot resolve `var(--font-sans)`, so read the resolved family off
+// a probe element instead.
 export function fontStacks(): Record<FontRole, string> {
   if (stacks) return stacks;
   if (typeof document === "undefined") return FALLBACKS;
@@ -89,8 +88,6 @@ export type ParagraphOptions = {
   align?: "left" | "right" | "justify";
 };
 
-// `justify` spreads word gaps to flush both edges, leaving the last line
-// ragged. Returns the baseline just past the final line.
 export function drawParagraph(
   ctx: CanvasRenderingContext2D,
   text: string,

@@ -49,8 +49,6 @@ export function PaletteControls({
   onClearSource,
   onExtractFromSource,
 }: PaletteControlsProps) {
-  // extractPalette names the palette after the file, so the two match exactly
-  // while the palette is still the one taken from the image.
   const paletteFromSource =
     Boolean(spec.sourceName) && spec.palette.name === spec.sourceName;
   const fileRef = React.useRef<HTMLInputElement>(null);
@@ -110,8 +108,6 @@ export function PaletteControls({
           }}
         />
         <Item variant="outline" size="sm" className="p-0">
-          {/* The row is the picker, so the clear action sits outside it —
-              a button cannot contain another button. */}
           <button
             type="button"
             onClick={() => fileRef.current?.click()}

@@ -63,8 +63,7 @@ function Slider({
             />
           ))}
 
-          {/* Drawn twice at the same offset, so the fill clips it mid-glyph
-              and the label inverts instead of disappearing. */}
+          {/* Drawn twice at one offset so the fill clips it mid-glyph. */}
           <span aria-hidden className="text-muted-foreground">
             {label}
           </span>

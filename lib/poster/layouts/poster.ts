@@ -22,7 +22,6 @@ const PAPER = "#f4f2ec";
 const INK = "#141210";
 
 const MARGIN = 76;
-// Deliberately wider than MARGIN: the right rail holds the rotated colophon.
 const RAIL = 150;
 const LIVE_WIDTH = POSTER_SHEET.width - MARGIN - RAIL;
 
@@ -151,8 +150,6 @@ function drawBodyPair(
 }
 
 function drawStack(context: RenderContext) {
-  // The essay is measured first; the grid then takes every line the copy
-  // leaves, so the sheet fills whether the text runs short or long.
   const colophon = POSTER_SHEET.height - MARGIN;
   const lines = bodyPairLines(context, LIVE_WIDTH, 14);
   const size = headlineSize(context, LIVE_WIDTH);
@@ -555,7 +552,6 @@ function drawPanel(context: RenderContext) {
     height: gridHeight,
   });
 
-  // Deliberately off-centre: more colour to the right and below the panel.
   const panelX = MARGIN + 48;
   const panelY = MARGIN + 380;
   const panelWidth = LIVE_WIDTH - 168;
@@ -732,7 +728,6 @@ export function drawPosterSheet(context: RenderContext) {
   }
 
   if (spec.posterVariant !== "diptych") {
-    // A light tooth over everything, so paper and ink share one surface.
     paperTexture(ctx, 0, 0, POSTER_SHEET.width, POSTER_SHEET.height, {
       seed: spec.seed + 101,
       intensity: spec.grain * 0.28,

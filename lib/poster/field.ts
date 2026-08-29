@@ -68,9 +68,6 @@ function fieldKey(spec: PosterSpec, time: number) {
 const HISTOGRAM_BINS = 512;
 const BALANCE = 0.85;
 
-// Every field function is bell-shaped around its midpoint, which would hand one
-// band most of the sheet. Flattening the histogram gives each colour a
-// comparable share; BALANCE is how far towards fully equal areas to go.
 function equalise(values: Float32Array, bands: number) {
   const histogram = new Uint32Array(HISTOGRAM_BINS);
   for (let i = 0; i < values.length; i++) {
@@ -115,7 +112,6 @@ export function renderField(spec: PosterSpec, options: FieldOptions = {}) {
   const { data } = image;
   const size = resolution;
 
-  // Contiguous slices, so `signal` tears in strips not per-scanline confetti.
   const sliceHeight = Math.max(1, Math.round(size / (14 + spec.scan * 44)));
 
   for (let y = 0; y < size; y++) {

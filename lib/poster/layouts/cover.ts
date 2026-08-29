@@ -142,7 +142,6 @@ function drawBleed(context: RenderContext) {
     maxLines: 6,
   });
 
-  // The running head sits straight on the field, so take its ink from there.
   ctx.fillStyle =
     sampleLuminance(field, 0, 0, 0.62, 0.12) > 150
       ? "rgba(20,18,16,0.9)"
